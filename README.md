@@ -2,7 +2,7 @@
 
 This project contains an implementation in python of web crawler.
 
-The python libaries dependencies are in requirements.txt
+The dependencies are in requirements.txt
 
 ## to run tests:
 ```bash
