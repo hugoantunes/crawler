@@ -1,6 +1,7 @@
 # encoding: utf-8
 import requests
 
+from multiprocessing import Process, Queue
 from urlparse3 import parse_url
 from bs4 import BeautifulSoup
 
@@ -29,6 +30,7 @@ class Crawler(object):
             url = self.url.geturl()
         response = requests.get(url)
         if response.status_code == 404:
+            print '%s return 404\n' % url
             raise Exception('Url does not exist')
         return response
 
@@ -75,3 +77,39 @@ class Crawler(object):
                 except KeyError:
                     pass
         return self.resources
+
+    def get_inside_url(self, path, q):
+        try:
+            requested_url = self.base_url + path
+            response = self.check_status_code(url=requested_url)
+            parsed_response = self.body_parser(response)
+            q.put(self.build_resources(url=path, response=parsed_response))
+        except Exception:
+            q.put({'error': path})
+
+    def get_all_resources(self):
+        self.build_resources()
+
+        print 'start Crawler to %s!\n' % self.product_name
+        while self.resources['urls'] != set(self.resources['assets'].keys()):
+            print 'searching in urls...'
+            urls = self.resources['urls']
+            q = Queue()
+            processes = []
+            for url in urls:
+                if url in urls:
+                    next
+                p = Process(target=self.get_inside_url, args=(url, q, ))
+                print url
+                processes.append(p)
+
+            for ps in processes:
+                ps.start()
+                paralel_resource = q.get()
+                if 'error' in paralel_resource:
+                    self.resources['urls'].remove(paralel_resource['error'])
+                else:
+                    self.resources['urls'].union(paralel_resource['urls'])
+                    self.resources['assets'].update(paralel_resource['assets'])
+                ps.join()
+        print '\nfinished!'
