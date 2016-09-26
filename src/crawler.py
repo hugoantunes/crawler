@@ -97,7 +97,7 @@ class Crawler(object):
             q = Queue()
             processes = []
             for url in urls:
-                if url in urls:
+                if url in self.resources['assets'].keys():
                     next
                 p = Process(target=self.get_inside_url, args=(url, q, ))
                 print url
