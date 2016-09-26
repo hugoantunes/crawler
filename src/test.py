@@ -25,7 +25,7 @@ class TestCrawler(unittest.TestCase):
         <script src="assets/js/modernizr-2.6.2-min.js"></script><link rel="stylesheet" href="assets/css/sss.css">\
         <a href="http://www.forbes.com/sites/ilyapozin/2015/09/10/3-trends-in-mobile-payments-you-need-to-know-about/"></a></html>'
 
-        excpected = {
+        expected = {
             'assets': {
                 '/index.html': set([
                     'http://anything.tests.com/any',
@@ -45,7 +45,7 @@ class TestCrawler(unittest.TestCase):
         mock.get(self.url, text=body)
         crawler = Crawler(self.url)
         crawler.build_resources()
-        self.assertEquals(excpected, crawler.resources)
+        self.assertEquals(expected, crawler.resources)
 
 if __name__ == '__main__':
     unittest.main()
