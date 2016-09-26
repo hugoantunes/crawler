@@ -18,18 +18,34 @@ class TestCrawler(unittest.TestCase):
             Crawler(self.url)
 
     @requests_mock.mock()
-    def test_should_keep_only_same_domain_url(self, mock):
+    def test_build_create_resources_correctly(self, mock):
         body = 'u<html><a href="#"></a><a href="founders.html"></a><a href="benefits.html"></a><a href="http://tests.com/extras/">\
-        </a><a href="http://tests.com/extras/comon"></a><a href="http://facebook.com/tests_page"></a>\
-        <a href="http://anything.tests.com/any"></a></html>'
+        </a><a href="http://tests.com/extras/comon"></a><a href="http://facebook.com/tests"></a>\
+        <a href="http://anything.tests.com/any"></a><img src="assets/images/icons/rewards-offers.png" class="overlay-icon">\
+        <script src="assets/js/modernizr-2.6.2-min.js"></script><link rel="stylesheet" href="assets/css/sss.css">\
+        <a href="http://www.forbes.com/sites/ilyapozin/2015/09/10/3-trends-in-mobile-payments-you-need-to-know-about/"></a></html>'
+
+        excpected = {
+            'assets': {
+                '/index.html': set([
+                    'http://anything.tests.com/any',
+                    'http://facebook.com/tests',
+                    'assets/images/icons/rewards-offers.png',
+                    'assets/js/modernizr-2.6.2-min.js',
+                    'assets/css/sss.css'])
+            },
+            'urls': set([
+                '/',
+                '/extras/index.html',
+                '/founders.html',
+                '/benefits.html',
+                '/extras/comon/index.html'])
+        }
+
         mock.get(self.url, text=body)
         crawler = Crawler(self.url)
-        self.assertEquals(set([
-            '/founders.html',
-            '/extras/index.html',
-            '/extras/comon/index.html',
-            '/benefits.html']), crawler.get_sitemap()['urls'])
-
+        crawler.build_resources()
+        self.assertEquals(excpected, crawler.resources)
 
 if __name__ == '__main__':
     unittest.main()

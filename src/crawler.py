@@ -8,11 +8,15 @@ class Crawler(object):
     def __init__(self, url):
         self.url = url
         self.domain = self._get_domain()
+        self.product_name = self._get_product_name()
         self.response = self.body_parser(self.check_status_code())
-        self.sitemap = {"urls": set()}
+        self.resources = {'urls': set(['/']), 'assets': {}}
 
     def _get_domain(self):
         return self.url.split('/')[2]
+
+    def _get_product_name(self):
+        return self.domain.split('.')[0]
 
     def check_status_code(self):
         response = requests.get(self.url)
@@ -23,20 +27,29 @@ class Crawler(object):
     def body_parser(self, response):
         return BeautifulSoup(response.text, 'lxml')
 
-    def get_sitemap(self):
-        all_links = self.response.find_all('a', href=True)
-        for idx, link in enumerate(all_links):
-            url = link['href']
-            if not url.startswith(self.url):
-                if not url.startswith(("http", "https")) and "#" not in url:
-                    self.sitemap['urls'].add('/' + url)
+    def build_resources(self, url=None):
+        if not url:
+            page = '/index.html'
+        self.resources['assets'].update({page: set()})
+        tags = self.response.find_all(['a', 'img', 'link', 'script'])
+        for tag in tags:
+            if tag.name == 'a':
+                href = tag['href']
+                if href.startswith(self.url):
+                    href = href.split(self.domain)[1]
+                    if href.endswith('index.html'):
+                        pass
+                    elif href.endswith('/'):
+                        href += 'index.html'
+                    else:
+                        href += '/index.html'
+                    self.resources['urls'].add(href)
+                elif not href.startswith(('http', 'https')) and '#' not in href:
+                    self.resources['urls'].add('/' + href)
+                elif self.product_name in href:
+                    self.resources['assets'][page].add(href)
+
+            elif tag.name == 'link':
+                self.resources['assets'][page].add(tag['href'])
             else:
-                url = url.split(self.domain)[1]
-                if url.endswith("index.html"):
-                    pass
-                elif url.endswith("/"):
-                    url += "index.html"
-                else:
-                    url += "/index.html"
-                self.sitemap['urls'].add(url)
-        return self.sitemap
+                self.resources['assets'][page].add(tag['src'])
