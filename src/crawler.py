@@ -10,7 +10,7 @@ class Crawler(object):
     def __init__(self, url):
         self.url = parse_url(url)
         self.response = self.body_parser(self.check_status_code())
-        self.resources = {'urls': set(['/']), 'assets': {}}
+        self.resources = {'urls': set(), 'assets': {}}
 
     @property
     def product_name(self):
@@ -38,6 +38,10 @@ class Crawler(object):
     def build_resources(self, url=None, response=None):
         if not url:
             page = '/index.html'
+            self.resources['urls'].add('/index.html')
+        else:
+            page = url
+
         if not response:
             response = self.response
 
@@ -70,3 +74,4 @@ class Crawler(object):
                     self.resources['assets'][page].add(tag['src'])
                 except KeyError:
                     pass
+        return self.resources

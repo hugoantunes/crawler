@@ -34,7 +34,7 @@ class TestCrawler(unittest.TestCase):
                     'assets/css/sss.css'])
             },
             'urls': set([
-                '/',
+                '/index.html',
                 '/extras/index.html',
                 '/founders.html',
                 '/benefits.html',
@@ -54,7 +54,7 @@ class TestCrawler(unittest.TestCase):
             'assets': {
                 '/index.html': set()
             },
-            'urls': set(['/', ])
+            'urls': set(['/index.html', ])
         }
 
         mock.get(self.url, text=body)
@@ -70,7 +70,7 @@ class TestCrawler(unittest.TestCase):
             'assets': {
                 '/index.html': set()
             },
-            'urls': set(['/', ])
+            'urls': set(['/index.html', ])
         }
 
         mock.get(self.url, text=body)
